@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>What does that mean?</title>
+        <script src="./resources/js/jquery-3.6.1.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+        <script src="./resources/js/jspsych-6.0.0.js"></script>
+        <script src="./resources/js/jspsych-pavlovia-3.0.0.js"></script>
+        <script src="./resources/js/plugins.fullscreen-1.0.0.js"></script>
+        <script src="./resources/js/plugins.instructions-1.0.0.js"></script>
+        <script src="./resources/js/plugins.html-button-response.js"></script>
+        <script src="./resources/js/plugins.survey-multi-choice.js"></script>
+        <script src="./resources/js/plugins.call-function.js"></script>
+        <script src="./resources/js/plugins.headphone_check.js"></script>
+        <script src="./resources/js/plugins.informed_consent_uke.js"></script>
+        <script src="./resources/js/plugins.2afc_audio_visual.js"></script>
+        <script src="./resources/js/plugins.image_categorisation.js"></script>
+        <script src="./resources/js/plugins.word_categorisation_circle.js"></script>
+        <script src="./resources/js/plugins.item_mapping.js"></script>
+        <link href="./resources/css/jspsych-6.0.0.css" rel="stylesheet" type="text/css" />
+        <link href="./resources/css/plugins.item_mapping.css" rel="stylesheet" type="text/css" />
+        <style>
+            /*
+            Make sure elements are nice and centred (and not too far out).
+            */
+
+            .jspsych-display-element {
+                max-width: 1400px; 
+                margin: 0 auto !important; 
+                float: none !important; 
+            }
+          </style>
+    </head>
+    <body></body>
+    <script>
+        // flags
+        const __flag_local = !(window.location.hostname == "run.pavlovia.org");
+        const __flag_fastmode = ('fm' in jsPsych.data.urlVariables());
+        const __flag_requireid = true;
+        const __flag_hc = !('dhc' in jsPsych.data.urlVariables());
+
+        // setup study descriptors
+        const study_title = 'How do expectations affect perception in human communication?'; // title of the study (informed consent)
+        const study_subtitle = 'Experiment 1.a: What does that mean? (online)'; // subtitle of the study (informed consent)
+        const study_language = 'en'; // language of the study (for plugin config)
+        const study_duration = '45'; // duration of the study (in minutes)
+        const study_hourly_rate = '£9.00'; // hourly pay (arbitrary units)
+        const study_key_left = 'LeftArrow'; // key value for left presses (in jsPsych)
+        const study_key_left_desc = '&#8592;'; // shortened key descriptor left (for instructions)
+        const study_key_left_long = '&#8592; (Left arrow key)';  // long key descriptor left (for instructions)
+        const study_key_right = 'RightArrow'; // key value for right presses (in jsPsych)
+        const study_key_right_desc = '&#8594;'; // shortened key descriptor right (for instructions)
+        const study_key_right_long = '&#8594; (Right arrow key)'; // long key descriptor right (for instructions)
+        const study_buffer_before_redirect = 2500; // buffer time before redirecting on completion (in ms)
+        const study_buffer_before_rejection = 10000; // buffer time before prematurely redirecting (in ms)
+
+        // participant descriptors
+        const prolific_pid = ('PROLIFIC_PID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().PROLIFIC_PID : undefined);
+        const prolific_eid = ('STUDY_ID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().STUDY_ID : undefined);
+        const prolific_sid = ('SESSION_ID' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().SESSION_ID : undefined);
+        const prolific_cid = 'C4Y3BQPX';
+        const prolific_rid_0 = 'CONRKYKB'; // consent
+        const prolific_rid_1 = 'C1B6E0FY'; // headphones
+        const prolific_rid_2 = 'CVTCMYD1'; // attention
+        const prolific_url = 'https://app.prolific.co/submissions/complete?cc={0}';
+        const pid = ('pid' in jsPsych.data.urlVariables() ? jsPsych.data.urlVariables().pid : prolific_pid);
+
+        /**
+         * Shuffles array in place (Fisher-Yates).
+         * @param {Array} a items An array containing the items.
+         */
+        function shuffle(a) {
+            var j, x, i;
+            for (i = a.length - 1; i > 0; i--) {
+                j = Math.floor(Math.random() * (i + 1));
+                x = a[i];
+                a[i] = a[j];
+                a[j] = x;
+            }
+            return a;
+        }
+
+        function run_experiment() {
+            // ensure pid exists, unless specified otherwise
+            if (__flag_requireid && (typeof(pid) === 'undefined' || pid.length < 1)) {
+                alert('Missing participant identifier. Please contact the lead researcher.')
+                return;
+            }
+
+            // setup timeline & preloads
+            let timeline = [];
+            let preload_audio = ['./resources/sounds/wheesh.mp3',
+                                 './resources/sounds/whoosh.mp3',
+                                 './resources/sounds/slide.mp3',
+                                 './resources/sounds/tap.mp3',
+                                 './resources/sounds/error.mp3',
+                                 './resources/sounds/success.mp3',
+                                 './resources/sounds/clock.mp3',
+                                 './resources/sounds/alarm.mp3'];
+            let preload_images = [];
+            let speakers = [];
+
+            // setup pavlovia session
+            if (!__flag_local) {
+                timeline.push({
+                    type: "pavlovia",
+                    command: "init"
+                });
+            }
+
+            if (!__flag_fastmode) {
+                // setup consent failure callback
+                let c_callback = (e) => {
+                    let trialContainer = $(e).find('#trial-container');
+                    let timer = $('<div style="width: 75%;" align="justify" id="timer">Returning to prolific in...<span id="countdown">' + (study_buffer_before_rejection / 1000).toString() + '</span></p>');
+                    let start_time = performance.now();
+                    let interval = setInterval(() => {
+                        let remaining_time = study_buffer_before_rejection - (performance.now() - start_time);
+                        $('#countdown').html(Math.round(remaining_time / 1000).toString());
+
+                        if (remaining_time <= 1e3 && remaining_time > 0) {
+                            $('#timer').hide();
+                        } else if (remaining_time <= 0) {
+                            clearInterval(interval);
+                            window.location = prolific_url.format(prolific_rid_0);
+                        }
+                    });
+                    timer.appendTo(trialContainer);
+                };
+
+                // setup brief & informed consent
+                timeline.push({
+                    type: "informed_consent_uke",
+                    study_language: study_language,
+                    study_title: study_title,
+                    study_subtitle: study_subtitle,
+                    study_centre: "the research group <i>Predictive Cognition</i> at the institute of systems neuroscience, university medical centre Hamburg-Eppendorf (UKE)",
+                    study_purpose: "how the brain acquires and applies expectations",
+                    study_description: "This experiment takes approximately " + study_duration.toString() + " minutes to complete. " + 
+                                       "Your task will be to place words in a circle such that the relative position of each word represents your perception of its semantic relation to other words. " + 
+                                       "<b>Note:</b> This study consists of two separate experiments. After completing this experiment, you will be given the option to participate in experiment two <i>What does that mean? (pt. II)</i>, available on Prolific. We encourage participants to complete both experiments, as successful enrolment in both experiments comes with a bonus payment of £5. ",
+                    study_inclusion_criteria: ulist('Healthy participants that are legally competent',
+                                                    '18-60 years of age',
+                                                    'native speaker of English',
+                                                    'Normal or corrected-to-normal vision (e.g., wearing glasses or contact lenses is permissible)',
+                                                    'Consent to participate'),
+                    study_exclusion_criteria: ulist('Severe neurological disorders impairing fine-motor skills or memory (e.g., Parkinson\'s disease, Alzheimer\'s disease, etc.)',
+                                                    'Dyslexia or dysgraphia',
+                                                    'Current abuse of or addiction to alcohol, drugs or medication.'),
+                    study_contact_person: 'Prof. Dr. Helen Blank',
+                    study_duration_in_minutes: study_duration,
+                    study_hourly_rate: study_hourly_rate,
+                    study_privacy_contact_person: 'Prof. Dr. Helen Blank',
+                    study_privacy_contact_centre: 'Research Centre One Health Ruhr of the University Alliance Ruhr',
+                    study_privacy_contact_address: 'Universitätsstr. 150 44801 Bochum',
+                    study_privacy_contact_phone: '(0)234 32-21453',
+                    study_privacy_contact_email: 'helen.blank@ruhr-uni-bochum.de',
+                    f_callback: c_callback
+                });
+
+                // setup full screen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscren_mode: true,
+                    message: '<p>The experiment will launch fullscreen mode now.</p>' + 
+                             '<p>Please do <b>not</b> exit fullscreen mode before completion of the experiment.</p>',
+                    button_label: "Continue"
+                });
+
+                // setup concrete instructions
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        '<div align="justify">' + paragraphs(
+                            bold('Instructions for the experiment'),
+                            'In this experiment, you will see circles surrounded by words. Please place the words inside the circle so that the distances between the words reflect how you understand the meanings of the words and their relationships to each other.',
+                            'To do this, please click on a word and drag and drop it to the desired position in the circle. You can move each word as often as you think is necessary. ' +
+                            'Once you have arranged all the words in a circle, please press `Done`.',
+                            'There are no right or wrong answers. We are interested in your individual opinion.',
+                            'Press `{0}` to go to the next page.'.format(study_key_right_desc)
+                        ) + '</div>',
+                        '<div align="justify">' + paragraphs(
+                            bold('Instructions for the experiment'),
+                            'In total, you will see 15 circles. Each circle contains 20 words that need to be arranged. You will have up to 3 minutes for each circle. However, this is only a guideline and you may take less or more time if needed.',
+                            '<b>Note:</b> Circles can be completed only after at least 1 minute. Please use this time to carefully adjust the arrangement of your circles.',
+                            '<b>Note:</b> The experiment will take about ' + study_duration.toString() + ' minutes and cannot be saved and continued later. You will be offered a short break after completion of every other circle.',
+                            'Please complete the experiment without distractions and in a quiet environment without interruptions.',
+                            'Are you ready?',
+                            'Press `{0}` to start the task, or `{1}` to go back to the previous explanation.'.format(study_key_right_desc, study_key_left_desc)
+                        ) + '</div>',
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Previous'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Continue'.format(study_key_right_desc)
+                });
+            }
+
+            function shuffle(array, indices = null) {
+                // quick fisher yates over array and, potentially, identifiers
+                const a = array.slice();
+                let idx;
+
+                if (indices == null || (Array.isArray(indices) && indices.length === 0)) {
+                    idx = [...Array(a.length).keys()];
+                } else {
+                    if (!Array.isArray(indices)) {
+                    throw new Error("shuffle: indices must be an array (or omitted).");
+                    }
+                    if (indices.length !== a.length) {
+                    throw new Error(`shuffle: indices length (${indices.length}) != array length (${a.length}).`);
+                    }
+                    idx = indices.slice();
+                }
+
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                    [idx[i], idx[j]] = [idx[j], idx[i]];
+                }
+
+                return { array: a, indices: idx };
+            }
+            
+            // training data
+            let words = ["accuracy","acknowledgement","ambiance","anthology","authenticity","automation","banquet","barbecue","belief","biology","bookmark","brains","chef","chemistry","competency","compliment","consciousness","container","continuation","contractor","cooperation","crop","cuisine","decor","downside","eatery","endeavor","explosion","fashion","foliage","fuss","gauge","grandfather","hardware","headquarters","hobby","inception","innovation","instrument","interaction","jewelry","laser","lifestyle","lover","mechanics","merchandise","micro","nature","par","pathway","phenomena","politics","proprietor","prosperity","quantity","relationship","reluctance","remedy","retailer","romance","scroll","spouse","synergy","technology","torture","transformation","usefulness","vibe","viewpoint","workout"];
+            let circles = [["inception","continuation","retailer","pathway","bookmark","acknowledgement","explosion","banquet","cooperation","anthology","ambiance","prosperity","chef","jewelry","headquarters","crop","mechanics","instrument","usefulness","quantity"],["interaction","contractor","workout","laser","consciousness","remedy","quantity","vibe","biology","scroll","technology","automation","politics","downside","cuisine","eatery","gauge","fuss","grandfather","synergy"],["belief","transformation","par","merchandise","competency","retailer","biology","hobby","compliment","barbecue","lifestyle","relationship","proprietor","micro","nature","innovation","romance","reluctance","authenticity","hardware"],["fashion","lover","spouse","phenomena","container","retailer","workout","viewpoint","torture","foliage","brains","decor","competency","chemistry","accuracy","endeavor","crop","laser","hobby","gauge"],["spouse","romance","foliage","nature","banquet","fuss","grandfather","usefulness","technology","instrument","fashion","compliment","mechanics","interaction","belief","endeavor","innovation","ambiance","torture","automation"],["anthology","acknowledgement","lover","cuisine","chemistry","proprietor","vibe","lifestyle","headquarters","belief","accuracy","remedy","prosperity","par","viewpoint","scroll","downside","bookmark","hardware","container"],["continuation","authenticity","decor","synergy","politics","belief","phenomena","pathway","chef","micro","eatery","brains","cooperation","transformation","consciousness","viewpoint","jewelry","contractor","barbecue","foliage"],["explosion","reluctance","inception","relationship","merchandise","viewpoint","grandfather","container","technology","jewelry","workout","instrument","proprietor","synergy","spouse","accuracy","chef","micro","interaction","remedy"],["contractor","innovation","scroll","headquarters","cooperation","nature","accuracy","eatery","inception","hobby","torture","relationship","gauge","anthology","reluctance","decor","fuss","bookmark","consciousness","endeavor"],["chemistry","vibe","competency","par","politics","mechanics","inception","compliment","pathway","explosion","brains","automation","merchandise","cuisine","fashion","transformation","phenomena","prosperity","fuss","relationship"],["romance","authenticity","banquet","biology","ambiance","lover","remedy","brains","consciousness","acknowledgement","reluctance","laser","fashion","continuation","hardware","downside","usefulness","barbecue","crop","explosion"],["lifestyle","quantity","vibe","contractor","par","spouse","instrument","continuation","decor","romance","chemistry","nature","laser","chef","merchandise","jewelry","usefulness","gauge","downside","endeavor"],["ambiance","quantity","workout","politics","pathway","hobby","hardware","innovation","container","lifestyle","automation","cooperation","lover","synergy","torture","barbecue","mechanics","proprietor","prosperity","interaction"],["micro","crop","acknowledgement","retailer","authenticity","automation","scroll","technology","vibe","foliage","headquarters","phenomena","merchandise","anthology","interaction","competency","eatery","banquet","lifestyle","grandfather"],["micro","crop","acknowledgement","retailer","authenticity","automation","scroll","technology","vibe","foliage","headquarters","phenomena","merchandise","anthology","interaction","competency","eatery","banquet","lifestyle","grandfather"]];
+            let identities = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13];
+            
+            // randomise within circles
+            for (let i = 0; i < circles.length; i++) {
+                const { array: shuffledCircle } = shuffle(circles[i]);
+                circles[i] = shuffledCircle;
+            }
+
+            // randomise order of circles, keeping identities aligned
+            const { array: circlesShuffled, indices: identitiesShuffled } = shuffle(circles, identities);
+            
+            // push task to timeline
+            timeline.push({
+                no: 0,
+                type: 'item_mapping',
+                words: words,
+                anchors: [],
+                per_circle: 20,
+                max_attempts: 200,
+                max_circles: 15,
+                freeze_words: false,
+                gamify: true,
+                sound: true,
+                time_per_circle: 3.0 * 60 * 1000,
+                min_per_circle: 1.0 * 60 * 1000,
+                circles_per_break: 2,
+                circles: circlesShuffled,
+                identities: identitiesShuffled,
+                sampling_frequency: 2
+            });
+
+            // setup pavlovia exit
+            if (!__flag_local) {
+                timeline.push({
+                    type: "pavlovia",
+                    command: "finish",
+                    participantId: pid
+                });
+            }
+
+            if (!__flag_fastmode) {
+                // setup full screen
+                timeline.push({
+                    type: "fullscreen",
+                    fullscren_mode: false,
+                    message: '<p>You may now leave fullscreen mode.</p>',
+                    button_label: "Continue"
+                });
+
+                // setup debrief
+                timeline.push({
+                    type: "instructions",
+                    pages: [
+                        '<div align="justify">' + paragraphs(
+                            bold('End of the experiment'),
+                            'Thank you very much for your participation and for contributing to our research.',
+                            'This was part one of two. You can complete part two of the experiment (<i>What does that mean? (pt. II)</i>) at any time in the next seven days. ' +
+                            'Whenever you would like to complete part two, please head over to Prolific and find <i>What does that mean? (pt. II)</i>. It will be available exclusively to participants who successfully enrolled in this experiment. ',
+                            'If you successfully participate in the second part of the experiment (payment approx. £6.75), you will receive an additional bonus payment of £5.',
+                            bold('Please do not close this window yet') + ', but press `{0}` to finish the experiment and return to Prolific to receive your payment. '.format(study_key_right_desc)
+                        ) + '</div>'
+                    ],
+                    allow_keys: true,
+                    key_backward: study_key_left,
+                    key_forward: study_key_right,
+                    show_clickable_nav: true,
+                    button_label_previous: '`{0}` Previous'.format(study_key_left_desc),
+                    button_label_next: '`{0}` Continue'.format(study_key_right_desc)
+                });
+            }
+
+            // setup wrap up
+            let on_finish = !__flag_local && (typeof(prolific_pid) !== 'undefined') &&
+                                             (typeof(prolific_cid) !== 'undefined') ? () => {
+                // redirect to prolific
+                setTimeout(() => { 
+                    window.location = prolific_url.format(prolific_cid);
+                }, study_buffer_before_redirect);
+            } : () => {
+                // print data
+                jsPsych.data.displayData('csv');
+            };
+
+            // setup identifiers
+            jsPsych.data.addProperties({pid: pid, 
+                                        prolific_pid: prolific_pid,
+                                        prolific_eid: prolific_eid,
+                                        prolific_sid: prolific_sid});
+
+            // launch experiment
+            jsPsych.init({timeline: timeline,
+                          preload_audio: preload_audio,
+                          preload_images: preload_images,
+                          on_finish: on_finish});
+        }
+        
+        $().ready(function(){
+            run_experiment();
+        });
+    </script>
+</html>

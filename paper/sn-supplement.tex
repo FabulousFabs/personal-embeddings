@@ -1,0 +1,265 @@
+\documentclass[pdflatex,sn-mathphys]{sn-jnl}
+\usepackage[utf8]{inputenc}
+
+\jyear{2023}
+
+\raggedbottom
+
+\begin{document}
+
+\title[Supplementary Information]{Humans learn and apply individual but not generalised speaker-specific semantic models:\newline Supplementary Information}
+
+\maketitle
+
+\begin{table}[h]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{All word-pairs and the corresponding contexts used in the present study.}\label{tab1}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+\multicolumn{2}{@{}c@{}}{Word pairs} & \multicolumn{2}{@{}c@{}}{Word pairs} \\
+\cmidrule{1-2}\cmidrule{3-4}%
+word$_A$-word$_B$ & contexts & word$_A$-word$_B$ & contexts \\
+\midrule
+Mais-weiß & food-fashion & segeln-Regeln & nature-politics \\
+würzen-kürzen & food-fashion & Berg-Wert & nature-politics \\
+Topf-Kopf & food-fashion & Feld-Geld & nature-politics \\
+Pflaume-braune & food-fashion & Wellen-Zellen & nature-tech \\
+dörren-dürren & food-fashion & erkunden-erfunden & nature-arts \\
+Kuchen-suchen & food-nature & Wähler-Wälder & politics-nature \\
+Zutaten-Flughafen & food-nature & autokratisch-automatisch & politics-tech \\
+duften-schuften & food-nature & Meinungen-Leitungen & politics-tech \\
+Brei-Schrei & food-arts & Recht-Nacht & politics-arts \\
+Olive-Motive & food-arts & Verwaltung-Vergeltung & politics-arts \\
+Panade-Ballade & food-arts & Justiz-Notiz & politics-arts \\
+Hitze-Witze & food-arts & Regime-intim & politics-arts \\
+Gurke-Schurke & food-arts & Watt-satt & tech-food \\
+Schmuck-Schluck & fashion-food & Hacker-lecker & tech-food \\
+Kopftuch-Kochbuch & fashion-food & Platine-Gardine & tech-fashion \\
+Saum-Schaum & fashion-food & Cloud-Braut & tech-fashion \\
+Kragen-Fragen & fashion-politics & Bit-Boot & tech-nature \\
+Anzüge-einzige & fashion-politics & Daten-waten& tech-nature \\
+Kette-Karte & fashion-tech & Volt-Wild & tech-nature \\
+Blazer-Laser & fashion-tech & Breitband-Treibsand & tech-nature \\
+Kapuze-kaputte & fashion-tech & Tastatur-Agentur & tech-politics \\
+Hemd-Held & fashion-arts & Prozessor-Professor & tech-politics \\
+Schal-Saal & fashion-arts & Pixel-Spitzel & tech-politics \\
+Stiefel-Staffel & fashion-arts & Echtzeit-Bescheid & tech-politics \\
+See-Tee & nature-food & Batterie-Fantasie & tech-arts \\
+Kayak-Cognac & nature-food & Benutzer-Beschützer & tech-arts \\
+Küste-Brüste & nature-fashion & Konzerte-Fährte & arts-nature \\
+radeln-Nadeln & nature-fashion & Dichter-Lichter & arts-nature \\
+schwimmen-Stimmen & nature-politics & Bühnen-Grünen & arts-politics \\
+Künste-Münze & arts-politics & Beethoven-betrogen & arts-politics \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[t]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Full outputs of the group-level subgroup-agnostic model.}\label{tab2}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & $\beta$ & $SE$ & $z$ & $p$ \\
+\midrule
+(Intercept) & $-0.16$ & $0.07$ & $-2.28$ & $2.24e^{-2}$ \\
+$z(t)$ & $-0.01$ & $0.03$ & $-0.32$ & $0.75$ \\
+$\kappa$ & $-1.79$ & $0.08$ & $-21.30$ & $1.18e^{-100}$ \\
+congruence[TRUE] & $0.28$ & $0.07$ & $3.95$ & $7.73e^{-5}$ \\
+$z(t)\times\kappa$ & $0.11$ & $0.05$ & $2.12$ & $3.37e^{-2}$ \\
+$z(t)\times$congruence[TRUE] & $0.07$ & $0.05$ & $1.41$ & $0.16$ \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Estimated marginal means and trends of the group-level subgroup-agnostic model.}\label{tab3}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & $\beta$ & $SE$ & lower bound & upper bound \\
+\midrule
+congruence[TRUE] & $0.11$ & $0.07$ & $-0.03$ & $0.25$ \\
+congruence[FALSE] & $-0.17$ & $0.07$ & $-0.30$ & $-0.03$ \\
+$z(t)\times$congruence[TRUE] & $0.06$ & $0.03$ & $-1.91e^{-3}$ & $0.12$ \\
+$z(t)\times$congruence[FALSE] & $-0.01$ & $0.03$ & $-0.08$ & $0.06$ \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[t]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Full outputs of the group-level subgroup-specific model.}\label{tab4}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & $\beta$ & $SE$ & $z$ & $p$ \\
+\midrule
+(Intercept) & $0.05$ & $0.07$ & $0.75$ & $0.45$ \\
+strategy[accuracy] & $-0.70$ & $0.09$ & $-8.14$ & $3.90e^{-16}$ \\
+$z(t)$ & $0.05$ & $0.04$ & $1.41$ & $0.16$ \\
+$\kappa$ & $-1.98$ & $0.06$ & $-30.61$ & $8.40e^{-206}$ \\
+congruence[TRUE] & $-0.08$ & $0.06$ & $-1.27$ & $0.20$ \\
+strategy[accuracy]$\times z(t)$ & $-0.28$ & $0.08$ & $-3.48$ & $5.07e^{-4}$ \\
+strategy[accuracy]$\times\kappa$ & $0.81$ & $0.12$ & $6.83$ & $8.59e^{-12}$ \\
+$z(t)\times\kappa$ & $0.05$ & $0.06$ & $0.93$ & $0.35$ \\
+strategy[accuracy]$\times$congruence[TRUE] & $1.50$ & $0.14$ & $10.67$ & $1.40e^{-26}$ \\
+$z(t)\times$congruence[TRUE] & $-0.10$ & $0.05$ & $-1.88$ & $0.06$ \\
+strategy[accuracy]$\times z(t)\times\kappa$ & $0.24$ & $0.12$ & $2.01$ & $0.04$ \\
+strategy[accuracy]$\times z(t)\times$congruence[TRUE] & $0.67$ & $0.11$ & $5.81$ & $6.23e^{-9}$ \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Estimated marginal means and trends of the group-level subgroup-specific model.}\label{tab5}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & $\beta$ & $SE$ & lower bound & upper bound \\
+\midrule
+strategy[accuracy]$\times$congruence[TRUE] & $0.75$ & $0.10$ & $0.55$ & $0.95$ \\
+strategy[accuracy]$\times$congruence[FALSE] & $-0.66$ & $0.09$ & $-0.84$ & $-0.48$ \\
+strategy[hearing]$\times$congruence[TRUE] & $-0.05$ & $0.07$ & $-0.18$ & $0.09$ \\
+strategy[hearing]$\times$congruence[FALSE] & $0.04$ & $0.07$ & $-0.09$ & $0.16$ \\
+strategy[accuracy]$\times\kappa$[-2] & $-1.76$ & $0.22$ & $-2.21$ & $-1.32$ \\
+strategy[accuracy]$\times\kappa$[2] & $-0.59$ & $0.24$ & $-1.06$ & $-0.12$ \\
+strategy[hearing]$\times\kappa$[-2] & $-2.09$ & $0.13$ & $-2.35$ & $-1.83$ \\
+strategy[hearing]$\times\kappa$[2] & $-1.87$ & $0.13$ & $-2.13$ & $-1.62$ \\
+strategy[accuracy]$\times$congruence[TRUE]$\times z(t)$ & $0.35$ & $0.07$ & $0.21$ & $0.48$ \\
+strategy[accuracy]$\times$congruence[FALSE]$\times z(t)$ & $-0.22$ & $0.07$ & $-0.36$ & $-0.08$ \\
+strategy[hearing]$\times$congruence[TRUE]$\times z(t)$ & $-0.05$ & $0.03$ & $-0.11$ & $0.02$ \\
+strategy[hearing]$\times$congruence[FALSE]$\times z(t)$ & $0.05$ & $0.04$ & $-0.02$ & $0.12$ \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[t]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Outputs for group-level analysis of speaker-specific and context-specific semantic spaces. Please note that individual participant intercepts have been omitted for brevity and only hyperpriors $\mu_S$ and $\sigma_S$ are shown.}\label{tab6}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & Mean posterior & $SD$ & $95\%$-credible interval \\
+\midrule
+$\mu_S$ & $0.45$ & $0.06$ & [$0.33$, $0.57$] \\
+$\sigma_S$ & $0.39$ & $0.05$ & [$0.30$, $0.50$] \\
+$\beta_t$ & $0.02$ & $0.03$ & [$-0.04$, $0.08$] \\
+$\beta_k$ & $-1.53$ & $0.06$ & [$-1.64$, $-1.41$] \\
+$\beta_{tk}$ & $0.26$ & $0.06$ & [$0.15$, $0.38$] \\
+$\beta_L$ & $0.63$ & $0.04$ & [$0.55$, $0.70$] \\
+$\beta_G$ & $0.79$ & $0.02$ & [$0.75$, $0.84$] \\
+$\beta_{tL}$ & $0.34$ & $0.03$ & [$0.28$, $0.39$] \\
+$\beta_{tG}$ & $0.19$ & $0.02$ & [$0.14$, $0.23$] \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[t]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Full outputs of the semantic space similarity model. Note that, for notational brevity, types have been abbreviated. Abbreviations are as follows: generalised speaker-invariant (GG), generalised chance-level (GC), individual speaker-invariant (LG), individual chance-level (LC).}\label{tab7}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & $\beta$ & $SE$ & $z$ & $p$ \\
+\midrule
+(Intercept) & $0.69$ & $0.01$ & $90.02$ & $4.07e^{-184}$ \\
+strategy[accuracy] & $-0.03$ & $0.02$ & $-1.94$ & $5.32e^{-2}$ \\
+$z(t)$ & $0.04$ & $3.75e^{-3}$ & $9.83$ & $2.49e^{-19}$ \\
+type[GG] & $-0.04$ & $0.01$ & $-3.43$ & $7.01e^{-4}$ \\
+type[GC] & $-0.04$ & $0.01$ & $-4.12$ & $5.23e^{-5}$ \\
+type[LG] & $0.11$ & $0.01$ & $10.44$ & $3.18e^{-21}$ \\
+type[LC] & $0.05$ & $0.01$ & $4.28$ & $2.74e^{-5}$ \\
+strategy[accuracy]$\times z(t)$ & $-0.03$ & $0.01$ & $-3.53$ & $5.08e^{-4}$ \\
+strategy[accuracy]$\times$type[GG] & $0.01$ & $0.02$ & $0.32$ & $0.75$ \\
+strategy[accuracy]$\times$type[GC] & $-0.01$ & $0.02$ & $-0.23$ & $0.82$ \\
+strategy[accuracy]$\times$type[LG] & $0.07$ & $0.02$ & $3.28$ & $1.20e^{-3}$ \\
+strategy[accuracy]$\times$type[LC] & $-0.05$ & $0.02$ & $-2.15$ & $3.22e^{-2}$ \\
+$z(t)\times$type[GG] & $0.02$ & $0.01$ & $3.93$ & $1.12e^{-4}$ \\
+$z(t) \times$type[GC] & $0.02$ & $0.01$ & $4.64$ & $5.80e^{-6}$ \\
+$z(t) \times$type[LG] & $0.01$ & $0.01$ & $1.69$ & $9.24e^{-2}$ \\
+$z(t) \times$type[LC] & $0.01$ & $0.01$ & $2.07$ & $3.95e^{-2}$ \\
+strategy[accuracy]$\times$type[GG]$\times z(t)$ & $0.01$ & $0.01$ & $0.57$ & $0.57$ \\
+strategy[accuracy]$\times$type[GC]$\times z(t)$ & $-6.35e^{4}$ & $0.01$ & $-0.06$ & $0.95$ \\
+strategy[accuracy]$\times$type[LG]$\times z(t)$ & $0.06$ & $0.01$ & $5.12$ & $6.42e^{-7}$ \\
+strategy[accuracy]$\times$type[LC]$\times z(t)$ & $-1.21e^{-3}$ & $0.01$ & $-0.11$ & $0.91$ \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\begin{minipage}{\textwidth}
+\caption{Estimated marginal means and trends of semantic space similarity model. Note that, again, types have been abbreviated for notational brevity. Abbreviations are: generalised speaker-invariant (GG), individual speaker-invariant (GI), speaker-invariant chance-level (GC), generalised speaker-specific (LG), speaker-specific chance-level (LC).}\label{tab8}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccc@{\extracolsep{\fill}}}
+\toprule%
+Parameter & $\beta$ & $SE$ & lower bound & upper bound \\
+\midrule
+strategy[accuracy]$\times$type[GG] & $0.63$ & $0.01$ & $0.60$ & $0.65$ \\
+strategy[accuracy]$\times$type[GI] & $0.66$ & $0.01$ & $0.63$ & $0.68$ \\
+strategy[accuracy]$\times$type[GC] & $0.61$ & $0.01$ & $0.58$ & $0.63$ \\
+strategy[accuracy]$\times$type[LG] & $0.84$ & $0.01$ & $0.82$ & $0.87$ \\
+strategy[accuracy]$\times$type[LC] & $0.65$ & $0.01$ & $0.63$ & $0.68$ \\
+strategy[hearing]$\times$type[GG] & $0.65$ & $0.01$ & $0.64$ & $0.67$ \\
+strategy[hearing]$\times$type[GI] & $0.69$ & $0.01$ & $0.67$ & $0.70$ \\
+strategy[hearing]$\times$type[GC] & $0.64$ & $0.01$ & $0.63$ & $0.66$ \\
+strategy[hearing]$\times$type[LG] & $0.80$ & $0.01$ & $0.79$ & $0.82$ \\
+strategy[hearing]$\times$type[LC] & $0.74$ & $0.01$ & $0.72$ & $0.75$ \\
+strategy[accuracy]$\times$type[GG]$\times z(t)$ & $0.04$ & $7.00e^{-3}$ & $0.02$ & $0.05$ \\
+strategy[accuracy]$\times$type[GI]$\times z(t)$ & $0.01$ & $0.01$ & $-4.77e^{-3}$ & $0.02$ \\
+strategy[accuracy]$\times$type[GC]$\times z(t)$ & $0.03$ & $0.01$ & $0.02$ & $0.05$ \\
+strategy[accuracy]$\times$type[LG]$\times z(t)$ & $0.08$ & $0.01$ & $0.06$ & $0.09$ \\
+strategy[accuracy]$\times$type[LC]$\times z(t)$ & $0.02$ & $0.01$ & $0.01$ & $0.03$ \\
+strategy[hearing]$\times$type[GG]$\times z(t)$ & $0.06$ & $3.75e^{-3}$ & $0.05$ & $0.07$ \\
+strategy[hearing]$\times$type[GI]$\times z(t)$ & $0.04$ & $3.75e^{-3}$ & $0.03$ & $0.04$ \\
+strategy[hearing]$\times$type[GC]$\times z(t)$ & $0.06$ & $3.75e^{-3}$ & $0.05$ & $0.07$ \\
+strategy[hearing]$\times$type[LG]$\times z(t)$ & $0.05$ & $3.75e^{-3}$ & $0.04$ & $0.05$ \\
+strategy[hearing]$\times$type[LC]$\times z(t)$ & $0.05$ & $3.75e^{-3}$ & $0.04$ & $0.06$ \\
+\botrule
+\end{tabular*}
+\end{minipage}
+\end{center}
+\end{table}
+
+\begin{figure}[h]%
+\centering
+\includegraphics[width=1.0\textwidth]{supp_fig1.pdf}
+\caption{Cosine dissimilarity for all individual words used in the present study, ordered by the contexts they were associated with. Left-hand side was computed over the original 300-dimensional GloVe space, whereas the right-hand side was computed over the preprocssed 50-dimensional GloVe space. For individual word pairs, please see Supplementary Table~\ref{tab1}. For relations between contexts, please see Fig. 1.}\label{suppfig1}
+\end{figure}
+
+\begin{figure}[h]%
+\centering
+\includegraphics[width=1.0\textwidth]{supp_fig2.pdf}
+\caption{Perceptual bias for all morphs included in the present study, as measured in the validation experiment. On the left-hand side, the full distribution is plotted and tested against null. On the right-hand side, individual contexts are plotted and tested against null. It should be noted that, on the right hand side, a positive $\kappa$-score indicates bias against a context, whereas a negative $\kappa$-score indicates bias in favour of a context.}\label{suppfig2}
+\end{figure}
+
+\begin{figure}[h]%
+\centering
+\includegraphics[width=0.5\textwidth]{supp_fig3.pdf}
+\caption{Fit of linear versus null models, contrasting generalised and individual semantic spaces across semantic embeddings from GloVe, GPT3 and BERT. This demonstrates well that the pattern of idiosyncratic spaces outperforming ground truth spaces does not pertain specifically to GloVe, but seems to reflect something about data-driven semantic spaces more generally.}\label{suppfig3}
+\end{figure}
+
+\begin{figure}[h]%
+\centering
+\includegraphics[width=1.0\textwidth]{supp_fig4.pdf}
+\caption{Probability of making a correct choice, conditioned on the semantic fit of the target word using Laplace priors. The left-hand side shows speaker-specific semantic fits, whereas the right-hand side shows speaker-invariant but context-specific semantic fits. This demonstrates well that participants relied on both speaker- and context-specific semantic priors. For details on the full model, please see Supplementary Table~\ref{tab6}.}\label{suppfig4}
+\end{figure}
+
+\end{document}
