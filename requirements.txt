@@ -1,7 +1,7 @@
 hydra-core==1.2.0
 loguru==0.6.0
 matplotlib==3.10.8
-mvpy@git+https://github.com/FabulousFabs/MVPy.git
+mvpy@git+https://github.com/FabulousFabs/MVPy.git@bd07ef2e29c3d210ccf65aca3bf92c1e41a137c6
 numpy==2.2.6
 pandas==2.3.3
 pybids==0.22.0.post0.dev3
