@@ -1,0 +1,10 @@
+# inherit defaults
+defaults:
+  - default
+  - _self_
+
+# model defaults
+name: nonlinear
+shared: true
+hidden: 25
+std: 0.02

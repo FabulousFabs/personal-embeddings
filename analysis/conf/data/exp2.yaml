@@ -1,0 +1,113 @@
+# inherit defaults
+defaults:
+  - exp1
+  - _self_
+
+# data specification
+path: "./data/ds-exp2/"         # bids root path
+resources: "./data/resources/"  # resource path
+
+# dataset descriptors (for bids generation)
+dataset_descriptors:
+  Name: "Semantic idiosyncracy (Experiment 2)"
+  HEDVersion: "8.0.0"
+  BIDSVersion: "1.10.0"
+  DatasetType: "raw"
+  License: ""
+  Authors: ["Fabian Schneider", "Helen Blank"]
+  Acknowledgements: ""
+  HowToAcknowledge: ""
+  Funding: []
+  EthicsApprovals: []
+  ReferencesAndLinks: []
+  DatasetDOI: "doi:"
+  GeneratedBy:
+    - Name: "custom"
+      Version: "1.0"
+      Container:
+        Type: "custom"
+        Tag: ""
+
+# dataset descriptors (for bids generation)
+derivative_descriptors:
+  Name: "Semantic idiosyncracy derivatives (Experiment 2)"
+  HEDVersion: "8.0.0"
+  BIDSVersion: "1.10.0"
+  DatasetType: "raw"
+  License: ""
+  Authors: ["Fabian Schneider", "Helen Blank"]
+  Acknowledgements: ""
+  HowToAcknowledge: ""
+  Funding: []
+  EthicsApprovals: []
+  ReferencesAndLinks: []
+  DatasetDOI: "doi:"
+  GeneratedBy:
+    - Name: "custom"
+      Version: "1.0"
+      Container:
+        Type: "custom"
+        Tag: ""
+
+# participant descriptors (for bids generation)
+participant_descriptors:
+  approvals:
+    source: "Total approvals"
+    name: "Approvals"
+    description: "Number of approvals on Prolific."
+  age:
+    source: "Age"
+    name: "Age"
+    description: "Self-reported age."
+  sex:
+    source: "Sex"
+    name: "Sex"
+    description: "Self-reported sex assigned at birth."
+  gender:
+    source: "Gender"
+    name: "Gender"
+    description: "Self-reported gender identification."
+  sexuality:
+    source: "Sexual orientation"
+    name: "Sexuality"
+    description: "Self-reported sexual orientation."
+  cob:
+    source: "Country of birth"
+    name: "Country of Birth"
+    description: "Self-reported country of birth."
+  cor:
+    source: "Country of residence"
+    name: "Country of Residence"
+    description: "Self-reported country of residence."
+  nationality:
+    source: "Nationality"
+    name: "Nationality"
+    description: "Self-reported nationality."
+  ethnicity:
+    source: "Ethnicity simplified"
+    name: "Ethnicity"
+    description: "Self-reported ethnicity."
+  ethnicity_detailed:
+    source: "Ethnicity"
+    name: "Ethnicity_detailed"
+    description: "Self-reported ethnicity with details."
+  languages:
+    source: "Fluent languages"
+    name: "Languages"
+    description: "Self-reported languages spoken."
+  language:
+    source: "Language"
+    name: "Language"
+    description: "Self-reported primary language spoken."
+  education:
+    source: "Highest education level completed"
+    name: "Education"
+    description: "Self-reported highest level of education attained."
+  student:
+    source: "Student status"
+    name: "Student"
+    description: "Whether or not they are currently enrolled in some form."
+  employment:
+    source: "Employment status"
+    name: "Employment"
+    description: "Self-reported current employment status."

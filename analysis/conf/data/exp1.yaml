@@ -1,0 +1,131 @@
+# data specification
+path: "./data/ds-exp1/"         # bids root path
+resources: "./data/resources/"  # resource path
+
+bids:
+  validate: True              # run bids validation?
+  cache_file: ".pybids_cache" # what database cache to use?
+  cache_reset: True           # should we reset database?
+
+# subject filters to apply
+filter:
+  age:
+    type: "range"
+    var: "age"
+    min: 18
+    max: 100
+
+# embeddings to use
+embeddings: 
+  models: ["glove"]
+  #models: ["t5-large"]
+  #models: ["e5-large"]
+  #models: ["t5-large-context"]
+  version: "raw"
+
+# preprocessing steps to apply
+preprocess:
+  boards:
+    demean: false  # demeans all boards to recentre them
+    scale: false   # scales all boards such that the furthest item is exactly at the radius
+  embeddings:
+    svd: false       # performs SVD decomposition over training data
+    rank: 50         # SVD rank, if applicable
+    normalise: true  # applies an F.normalize to embeddings
+
+# dataset descriptors (for bids generation)
+dataset_descriptors:
+  Name: "Semantic idiosyncracy (Experiment 1)"
+  HEDVersion: "8.0.0"
+  BIDSVersion: "1.10.0"
+  DatasetType: "raw"
+  License: ""
+  Authors: ["Fabian Schneider", "Helen Blank"]
+  Acknowledgements: ""
+  HowToAcknowledge: ""
+  Funding: []
+  EthicsApprovals: []
+  ReferencesAndLinks: []
+  DatasetDOI: "doi:"
+  GeneratedBy:
+    - Name: "custom"
+      Version: "1.0"
+      Container:
+        Type: "custom"
+        Tag: ""
+
+# dataset descriptors (for bids generation)
+derivative_descriptors:
+  Name: "Semantic idiosyncracy derivatives (Experiment 1)"
+  HEDVersion: "8.0.0"
+  BIDSVersion: "1.10.0"
+  DatasetType: "raw"
+  License: ""
+  Authors: ["Fabian Schneider", "Helen Blank"]
+  Acknowledgements: ""
+  HowToAcknowledge: ""
+  Funding: []
+  EthicsApprovals: []
+  ReferencesAndLinks: []
+  DatasetDOI: "doi:"
+  GeneratedBy:
+    - Name: "custom"
+      Version: "1.0"
+      Container:
+        Type: "custom"
+        Tag: ""
+
+# participant descriptors (for bids generation)
+participant_descriptors:
+  approvals:
+    source: "Total approvals"
+    name: "Approvals"
+    description: "Number of approvals on Prolific."
+  age:
+    source: "Age"
+    name: "Age"
+    description: "Age."
+  sex:
+    source: "Sex"
+    name: "Sex"
+    description: "Sex assigned at birth."
+  gender:
+    source: "Gender"
+    name: "Gender"
+    description: "Gender identification."
+  cob:
+    source: "Country of birth"
+    name: "Country of Birth"
+    description: "Reported country of birth."
+  cor:
+    source: "Country of residence"
+    name: "Country of Residence"
+    description: "Reported country of residence."
+  nationality:
+    source: "Nationality"
+    name: "Nationality"
+    description: "Reported nationality."
+  ethnicity:
+    source: "Ethnicity simplified"
+    name: "Ethnicity"
+    description: "Reported ethnicity."
+  languages:
+    source: "Fluent languages"
+    name: "Languages"
+    description: "Languages spoken."
+  language:
+    source: "Language"
+    name: "Language"
+    description: "Primary language spoken."
+  education:
+    source: "Highest education level completed"
+    name: "Education"
+    description: "Highest level of education attained."
+  student:
+    source: "Student status"
+    name: "Student"
+    description: "Whether or not they are currently enrolled in some form."
+  employment:
+    source: "Employment status"
+    name: "Employment"
+    description: "Current employment status."

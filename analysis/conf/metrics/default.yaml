@@ -1,0 +1,12 @@
+# gram setup
+gram: "euclidean"
+
+# loss setup
+loss: 
+  mse:
+  simse:
+    eps: 1e-6
+  pearson:
+  rank:
+    samples: 512
+    tau: 1e-1

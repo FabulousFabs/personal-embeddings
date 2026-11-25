@@ -1,0 +1,211 @@
+# reliability task
+mareliability:
+  skip: true
+  repeats: 1
+  min_length: 3
+  correct: false
+  ceiling: false
+
+# reliability across sessions task
+macrossreliability:
+  skip: true
+  repeats: 1
+  min_length: 3
+  correct: false
+  ceiling: false
+
+# model training task
+matrain:
+  skip: false
+  splits: 3
+  repeats: 5
+  permutations: 3
+
+# model testing across sessions task
+macross:
+  skip: true
+
+# model similarity evaluation
+masim:
+  skip: true
+
+# subject-embedding similarity evaluation
+masubemb:
+  skip: true
+  demographics:
+    age:
+      sources: "age"
+      type: "continuous"
+      rank: false
+      dyad: false
+      pca: false
+    gender:
+      sources: "gender"
+      type: "categorical"
+      order: [
+        "Woman (including Trans Female/Trans Woman)", 
+        "Man (including Trans Male/Trans Man)",
+        "Non-binary (would like to give more detail)"
+      ]
+      rank: false
+      dyad: false
+      pca: false
+    ethnicity:
+      sources: "ethnicity"
+      type: "categorical"
+      order: [
+        "Asian",
+        "Black",
+        "White"
+      ]
+      rank: false
+      dyad: false
+      pca: false
+    education:
+      sources: "education"
+      type: "categorical"
+      order: [
+        "No formal qualifications",
+        "Secondary education (e.g. GED/GCSE)",
+        "High school diploma/A-levels",
+        "Technical/community college",
+        "Undergraduate degree (BA/BSc/other)",
+        "Graduate degree (MA/MSc/MPhil/other)",
+        "Doctorate degree (PhD/other)"
+      ]
+      rank: false
+      dyad: false
+      pca: false
+    employment:
+      sources: "employment"
+      type: "categorical"
+      order: [
+        "Not in paid work (e.g. homemaker', 'retired or disabled)",
+        "Unemployed (and job seeking)",
+        "Due to start a new job within the next month",
+        "Part-Time",
+        "Full-Time"
+      ]
+      rank: false
+      dyad: false
+      pca: false
+    interests:
+      sources: [
+        "interest_1_0", "interest_1_1", "interest_1_2",
+        "interest_1_3", "interest_1_4", "interest_1_5"
+      ]
+      type: "continuous"
+      rank: false
+      dyad: false
+      pca: false
+  coding: "sum"
+  splits: 10
+  repeats: 20
+  permutations: 2500
+  jobs: 8
+
+# subject-embedding similarity evaluation
+masubsub:
+  skip: true
+  demographics:
+    age:
+      sources: "age"
+      type: "continuous"
+      rank: false
+      dyad: true
+      pca: false
+    gender:
+      sources: "gender"
+      type: "categorical"
+      order: [
+        "Woman (including Trans Female/Trans Woman)", 
+        "Man (including Trans Male/Trans Man)",
+        "Non-binary (would like to give more detail)"
+      ]
+      rank: false
+      dyad: true
+      pca: false
+    ethnicity:
+      sources: "ethnicity"
+      type: "categorical"
+      order: [
+        "Asian",
+        "Black",
+        "White"
+      ]
+      rank: false
+      dyad: true
+      pca: false
+    education:
+      sources: "education"
+      type: "categorical"
+      order: [
+        "No formal qualifications",
+        "Secondary education (e.g. GED/GCSE)",
+        "High school diploma/A-levels",
+        "Technical/community college",
+        "Undergraduate degree (BA/BSc/other)",
+        "Graduate degree (MA/MSc/MPhil/other)",
+        "Doctorate degree (PhD/other)"
+      ]
+      rank: false
+      dyad: true
+      pca: false
+    employment:
+      sources: "employment"
+      type: "categorical"
+      order: [
+        "Not in paid work (e.g. homemaker', 'retired or disabled)",
+        "Unemployed (and job seeking)",
+        "Due to start a new job within the next month",
+        "Part-Time",
+        "Full-Time"
+      ]
+      rank: false
+      dyad: true
+      pca: false
+    interests:
+      sources: [
+        "interest_1_0", "interest_1_1", "interest_1_2",
+        "interest_1_3", "interest_1_4", "interest_1_5"
+      ]
+      type: "continuous"
+      rank: false
+      dyad: true
+      pca: false
+  coding: "one-hot"
+  splits: 5
+  repeats: 20
+  permutations: 2500
+  jobs: 8
+
+maspace:
+  skip: true
+  compare:
+    baseline: m1
+    contender: m2
+  data:
+    train: false
+    test: true
+  demographics:
+    interests:
+      sources: [
+        "interest_1_0", "interest_1_1", "interest_1_2", "interest_1_4", "interest_1_5"
+      ]
+      type: "continuous"
+      rank: false
+      dyad: false
+      pca: false
+  norms:
+    sources: [
+      "frequency", "aoa", "concreteness", "valence", "arousal", "dominance", 
+      "imageability", "familiarity", "gender", "auditory", "gustatory",
+      "haptic", "interoceptive", "olfactory", "visual", "socialness",
+      "diversity"
+    ]
+    groups: false
+    norm_y: false
+  splits: 5
+  repeats: 20
+  permutations: 2500
+  jobs: 8

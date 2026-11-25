@@ -1,0 +1,22 @@
+# setup hydra
+hydra:
+  run:
+    dir: .
+  job:
+    chdir: false
+
+# setup parameter defaults
+defaults:
+  - _self_
+  - data: exp1
+  - task: default
+  - model: default
+  - metrics: default
+
+# logging
+verbose: true
+
+# experiment parameters
+run: 1
+seed: 42
+device:

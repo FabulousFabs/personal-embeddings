@@ -1,0 +1,15 @@
+# inherit defaults
+defaults:
+  - default
+  - _self_
+
+# model defaults
+# NOTE:
+# Bias makes this an affine transformation. However, if the metric used
+# is cosine (or normalised euclidean), this may inadvertantly lead the 
+# model to abuse the origin dependence in unintended ways that aren't 
+# strictly linear deforamtions. Be careful, therefore, with bias layers 
+# in this model. When in doubt, leave them out.
+name: linear
+shared: true
+bias: false

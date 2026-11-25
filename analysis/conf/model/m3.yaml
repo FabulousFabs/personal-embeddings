@@ -1,0 +1,44 @@
+# inherit defaults
+defaults:
+  - default
+  - _self_
+
+# model defaults
+name: delta
+rank: 5
+
+encoder:
+  enable: true
+  layers: [50, 25]
+  activation: ${model.activation}
+  dropout: 0.2
+
+latent:
+  enable: true
+  layers:
+    layer1:
+      type: "lora"
+      linear:
+        dropout: 0.2
+        activation: ${model.activation}
+      lora:
+        per_subject: ${model.per_subject}
+        dropout: 0.2
+        alpha: 16.0
+        rank: ${model.rank}
+    layer2:
+      type: "lora"
+      linear:
+        dropout: 0.2
+        activation: ${model.activation}
+      lora:
+        per_subject: ${model.per_subject}
+        dropout: 0.2
+        alpha: 16.0
+        rank: ${model.rank}
+
+decoder:
+  enable: true
+  layers: [25, 50]
+  activation: ${model.activation}
+  dropout: 0.2
