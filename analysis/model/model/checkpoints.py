@@ -46,7 +46,7 @@ def make_path_identifier(cfg: DictConfig, name: str, repeat: int, split: int, pe
     sub_path.mkdir(parents = True, exist_ok = True)
     
     # make identifier
-    identifier = f'rep-{repeat:03d}_spt-{repeat:03d}_prm-{permutation:03d}_bse-{name}_mod-{model}'
+    identifier = f'rep-{repeat:03d}_spt-{split:03d}_prm-{permutation:03d}_bse-{name}_mod-{model}'
     
     return sub_path, identifier
 
