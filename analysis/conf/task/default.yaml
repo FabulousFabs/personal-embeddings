@@ -23,7 +23,7 @@ matrain:
 
 # model testing across sessions task
 macross:
-  skip: true
+  skip: false
 
 # model similarity evaluation
 masim:

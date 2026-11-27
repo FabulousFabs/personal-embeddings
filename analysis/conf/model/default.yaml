@@ -68,6 +68,7 @@ training:
   #batch_size: 4096
   epochs: 500
   patience:
+    enable: false
     wait: 25
     burn_in: 250
   denoising:

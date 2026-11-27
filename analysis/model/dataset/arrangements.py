@@ -192,6 +192,15 @@ class Arrangements:
                     ) == False
                 ]
                 
+                # check patience mode
+                if self.cfg.model.training.patience.enable == False:
+                    # in case we don't employ patience, we'd like to 
+                    # include the validation data as part of the test
+                    # set because validation isn't besides the early
+                    # stopping algo
+                    test_mask = valid_mask | test_mask
+                    boards_test = torch.cat([boards_test, boards_valid])
+                
                 yield ArrangementsSplit(
                     self.subset(train_mask),
                     self.subset(valid_mask),
@@ -380,7 +389,7 @@ class Arrangements:
                         # compute gram matrices
                         gram = lambda x: torch.linalg.norm(x[:,None,:] - x[None,:,:], dim = -1)
                         JJ = gram(self.positions[mask_j][anchors_j])
-                        KK = gram(self.positions[mask_j][anchors_k])
+                        KK = gram(self.positions[mask_k][anchors_k])
                         
                         # compute spearman rho
                         tx, ty = torch.triu_indices(*JJ.shape, offset = 1)

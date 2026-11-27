@@ -137,6 +137,21 @@ def arrangement_train_single(delta: nn.Module, split: ArrangementsSplit, name: s
         # take average loss
         loss_train = loss_total / loss_n
         
+        # check patience procedure
+        if cfg.model.training.patience.enable == False:
+            # in this case, we can fully skip the validation
+            # step and resume training
+            if cfg.verbose:
+                print(f'ep{ep:03d}: {loss_train}')
+            
+            history_train.append(loss_train)
+            epoch_best = ep
+            params = {
+                k: v.detach().cpu().clone()
+                for k, v in delta.state_dict().items()
+            }
+            continue
+        
         # set to eval
         delta.eval()
         
@@ -181,7 +196,8 @@ def arrangement_train_single(delta: nn.Module, split: ArrangementsSplit, name: s
         history_train.append(loss_train)
         history_valid.append(loss_valid)
         
-        print(f'ep{ep:03d}: {loss_train}\t{loss_valid}')
+        if cfg.verbose:
+            print(f'ep{ep:03d}: {loss_train}\t{loss_valid}')
         
         # check patience
         burnt_in = ep >= cfg.model.training.patience.burn_in
@@ -202,7 +218,10 @@ def arrangement_train_single(delta: nn.Module, split: ArrangementsSplit, name: s
         
     # make histories
     history_train = torch.tensor(history_train).float()
-    history_valid = torch.tensor(history_valid).float()
+    if cfg.model.training.patience.enable == False:
+        history_valid = torch.zeros_like(history_train).float()
+    else:
+        history_valid = torch.tensor(history_valid).float()
     
     # load best state
     delta.load_state_dict(params, strict = True)
@@ -290,6 +309,12 @@ def arrangement_eval_single(delta: nn.Module, split: ArrangementsSplit, name: st
     # setup eval mode
     delta.eval()
     
+    n_words = max(
+        split.train.word_nos.max().item(),
+        split.valid.word_nos.max().item(),
+        split.test.word_nos.max().item()
+    ) + 1
+    
     with torch.no_grad():
         # iterate over subjects
         for i, subject_i in enumerate(torch.unique(split.test.subject_nos)):
@@ -322,8 +347,12 @@ def arrangement_eval_single(delta: nn.Module, split: ArrangementsSplit, name: st
                 
                 # find words that are unique in test set
                 words_test = torch.unique(split.test.word_nos[mask_j])
+                words_valid = torch.unique(split.valid.word_nos)
                 words_train = torch.unique(split.train.word_nos)
-                b_unseen = torch.isin(words_test, words_train) == False
+                if cfg.model.training.patience.enable == False:
+                    b_unseen = torch.isin(words_test, words_train) == False
+                else:
+                    b_unseen = (torch.isin(words_test, words_train) | torch.isin(words_test, words_valid)) == False
                 words_unseen = words_test[b_unseen]
                 
                 # make order
@@ -477,16 +506,11 @@ def arrangement_train(task: DictConfig, data: Dataset, cfg: DictConfig, logger: 
     rho_BE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device)
     rho_ZE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device)
     n_boards = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device)
-    
-    pns_rho_BZ = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    pns_rho_BE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    pns_rho_ZE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device) * torch.nan
     n_pairs = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device)
-    
-    uns_rho_BZ = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    uns_rho_BE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    uns_rho_ZE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device) * torch.nan
     n_words = torch.zeros((n_subjects, n_subjects, len(data.embeddings), task.splits * task.repeats, task.permutations), dtype = torch.float, device = cfg.device)
+    
+    weighted_sums = {}
+    weight_sums = {}
     
     # setup progress
     pbar = tqdm(
@@ -534,17 +558,36 @@ def arrangement_train(task: DictConfig, data: Dataset, cfg: DictConfig, logger: 
                 rho_ZE[:,:,e_i,f_i,p_i] = outputs_test['rho_ZE'].mean(-1)
                 n_boards[:,:,e_i,f_i,p_i] = outputs_test['boards_test'].shape[0]
                 
-                # make summaries for unseen pairs
-                pns_rho_BZ[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['p_unseen_rho_BZ'], dim = -1)
-                pns_rho_BE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['p_unseen_rho_BE'], dim = -1)
-                pns_rho_ZE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['p_unseen_rho_ZE'], dim = -1)
-                n_pairs[:,:,e_i,f_i,p_i] = outputs_test['p_unseen_count'].sum(-1)
-                
-                # make summaries for unseen words
-                uns_rho_BZ[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['unseen_rho_BZ'], dim = -1)
-                uns_rho_BE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['unseen_rho_BE'], dim = -1)
-                uns_rho_ZE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['unseen_rho_ZE'], dim = -1)
-                n_words[:,:,e_i,f_i,p_i] = outputs_test['unseen_count'].sum(-1)
+                pair_counts = outputs_test['p_unseen_count']
+                word_counts = outputs_test['unseen_count']
+
+                # A board with m unseen words contributes m * (m - 1) / 2 distances.
+                word_pair_counts = word_counts * (word_counts - 1) / 2
+
+                for source, target, weights in (
+                    ('p_unseen_', 'pns_', pair_counts),
+                    ('unseen_', 'uns_', word_pair_counts),
+                ):
+                    for metric in ('rho_BZ', 'rho_BE', 'rho_ZE'):
+                        key = target + metric
+                        scores = outputs_test[source + metric]  # [participant, adapter, board]
+                        valid = torch.isfinite(scores) & (weights > 0)
+
+                        if key not in weighted_sums:
+                            shape = (*scores.shape[:2], len(data.embeddings))
+                            weighted_sums[key] = scores.new_zeros(shape)
+                            weight_sums[key] = scores.new_zeros(shape)
+
+                        weighted_sums[key][:, :, e_i] += torch.where(
+                            valid, scores * weights, 0.0
+                        ).sum(dim=-1)
+                        weight_sums[key][:, :, e_i] += torch.where(
+                            valid, weights, 0.0
+                        ).sum(dim=-1)
+
+                # Keep the existing descriptive outputs in their original units.
+                n_pairs[:, :, e_i, f_i, p_i] = pair_counts.sum(dim=-1)
+                n_words[:, :, e_i, f_i, p_i] = word_counts.sum(dim=-1)
                 
                 # save model and data
                 model.save(delta, cfg, name, split.repeat, split.split, p_i)
@@ -564,26 +607,16 @@ def arrangement_train(task: DictConfig, data: Dataset, cfg: DictConfig, logger: 
     rho_BE = (n_boards * rho_BE).sum(dim = (-1, -2)) / n_boards.sum(dim = (-1, -2))
     rho_ZE = (n_boards * rho_ZE).sum(dim = (-1, -2)) / n_boards.sum(dim = (-1, -2))
     
-    pns_rho_BZ = torch.nansum(n_pairs * pns_rho_BZ, dim = (-1, -2)) / torch.clamp(n_pairs.sum(dim = (-1, -2)), min = 1.0)
-    pns_rho_BE = torch.nansum(n_pairs * pns_rho_BE, dim = (-1, -2)) / torch.clamp(n_pairs.sum(dim = (-1, -2)), min = 1.0)
-    pns_rho_ZE = torch.nansum(n_pairs * pns_rho_ZE, dim = (-1, -2)) / torch.clamp(n_pairs.sum(dim = (-1, -2)), min = 1.0)
-    
-    uns_rho_BZ = torch.nansum(n_words * uns_rho_BZ, dim = (-1, -2)) / torch.clamp(n_words.sum(dim = (-1, -2)), min = 1.0)
-    uns_rho_BE = torch.nansum(n_words * uns_rho_BE, dim = (-1, -2)) / torch.clamp(n_words.sum(dim = (-1, -2)), min = 1.0)
-    uns_rho_ZE = torch.nansum(n_words * uns_rho_ZE, dim = (-1, -2)) / torch.clamp(n_words.sum(dim = (-1, -2)), min = 1.0)
-
     # prepare outputs
     outputs = {
         'rho_nc': rho_NC,
         'rho_BZ': rho_BZ,
         'rho_BE': rho_BE,
         'rho_ZE': rho_ZE,
-        'pns_rho_BZ': pns_rho_BZ,
-        'pns_rho_BE': pns_rho_BE,
-        'pns_rho_ZE': pns_rho_ZE,
-        'uns_rho_BZ': uns_rho_BZ,
-        'uns_rho_BE': uns_rho_BE,
-        'uns_rho_ZE': uns_rho_ZE,
+        **{
+            key: weighted_sums[key] / weights.masked_fill(weights == 0, torch.nan)
+            for key, weights in weight_sums.items()
+        },
         'n_train': n_train,
         'n_boards': n_boards,
         'n_pairs': n_pairs,
@@ -624,16 +657,11 @@ def arrangement_cross(task: DictConfig, data: Dataset, cfg: DictConfig, logger: 
     rho_BE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device)
     rho_ZE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device)
     n_boards = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device)
-    
-    pns_rho_BZ = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    pns_rho_BE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    pns_rho_ZE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device) * torch.nan
     n_pairs = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device)
-    
-    uns_rho_BZ = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    uns_rho_BE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device) * torch.nan
-    uns_rho_ZE = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device) * torch.nan
     n_words = torch.zeros((n_subjects, n_subjects, len(data.embeddings), cfg.task.matrain.splits * cfg.task.matrain.repeats, cfg.task.matrain.permutations), dtype = torch.float, device = cfg.device)
+    
+    weighted_sums = {}
+    weight_sums = {}
     
     # setup tqdm
     pbar = tqdm(
@@ -679,17 +707,36 @@ def arrangement_cross(task: DictConfig, data: Dataset, cfg: DictConfig, logger: 
                 rho_ZE[:,:,e_i,f_i,p_i] = outputs_test['rho_ZE'].mean(-1)
                 n_boards[:,:,e_i,f_i,p_i] = outputs_test['boards_test'].shape[0]
                 
-                # make summaries for unseen pairs
-                pns_rho_BZ[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['p_unseen_rho_BZ'], dim = -1)
-                pns_rho_BE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['p_unseen_rho_BE'], dim = -1)
-                pns_rho_ZE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['p_unseen_rho_ZE'], dim = -1)
-                n_pairs[:,:,e_i,f_i,p_i] = outputs_test['p_unseen_count'].sum(-1)
-                
-                # make summaries for unseen words
-                uns_rho_BZ[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['unseen_rho_BZ'], dim = -1)
-                uns_rho_BE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['unseen_rho_BE'], dim = -1)
-                uns_rho_ZE[:,:,e_i,f_i,p_i] = torch.nanmean(outputs_test['unseen_rho_ZE'], dim = -1)
-                n_words[:,:,e_i,f_i,p_i] = outputs_test['unseen_count'].sum(-1)
+                pair_counts = outputs_test['p_unseen_count']
+                word_counts = outputs_test['unseen_count']
+
+                # A board with m unseen words contributes m * (m - 1) / 2 distances.
+                word_pair_counts = word_counts * (word_counts - 1) / 2
+
+                for source, target, weights in (
+                    ('p_unseen_', 'pns_', pair_counts),
+                    ('unseen_', 'uns_', word_pair_counts),
+                ):
+                    for metric in ('rho_BZ', 'rho_BE', 'rho_ZE'):
+                        key = target + metric
+                        scores = outputs_test[source + metric]  # [participant, adapter, board]
+                        valid = torch.isfinite(scores) & (weights > 0)
+
+                        if key not in weighted_sums:
+                            shape = (*scores.shape[:2], len(data.embeddings))
+                            weighted_sums[key] = scores.new_zeros(shape)
+                            weight_sums[key] = scores.new_zeros(shape)
+
+                        weighted_sums[key][:, :, e_i] += torch.where(
+                            valid, scores * weights, 0.0
+                        ).sum(dim=-1)
+                        weight_sums[key][:, :, e_i] += torch.where(
+                            valid, weights, 0.0
+                        ).sum(dim=-1)
+
+                # Keep the existing descriptive outputs in their original units.
+                n_pairs[:, :, e_i, f_i, p_i] = pair_counts.sum(dim=-1)
+                n_words[:, :, e_i, f_i, p_i] = word_counts.sum(dim=-1)
                 
                 # save model and data
                 model.save_supplement(outputs_test, cfg, name, split.repeat, split.split, p_i, 'retest')
@@ -705,25 +752,15 @@ def arrangement_cross(task: DictConfig, data: Dataset, cfg: DictConfig, logger: 
     rho_BE = (n_boards * rho_BE).sum(dim = (-1, -2)) / n_boards.sum(dim = (-1, -2))
     rho_ZE = (n_boards * rho_ZE).sum(dim = (-1, -2)) / n_boards.sum(dim = (-1, -2))
     
-    pns_rho_BZ = torch.nansum(n_pairs * pns_rho_BZ, dim = (-1, -2)) / torch.clamp(n_pairs.sum(dim = (-1, -2)), min = 1.0)
-    pns_rho_BE = torch.nansum(n_pairs * pns_rho_BE, dim = (-1, -2)) / torch.clamp(n_pairs.sum(dim = (-1, -2)), min = 1.0)
-    pns_rho_ZE = torch.nansum(n_pairs * pns_rho_ZE, dim = (-1, -2)) / torch.clamp(n_pairs.sum(dim = (-1, -2)), min = 1.0)
-    
-    uns_rho_BZ = torch.nansum(n_words * uns_rho_BZ, dim = (-1, -2)) / torch.clamp(n_words.sum(dim = (-1, -2)), min = 1.0)
-    uns_rho_BE = torch.nansum(n_words * uns_rho_BE, dim = (-1, -2)) / torch.clamp(n_words.sum(dim = (-1, -2)), min = 1.0)
-    uns_rho_ZE = torch.nansum(n_words * uns_rho_ZE, dim = (-1, -2)) / torch.clamp(n_words.sum(dim = (-1, -2)), min = 1.0)
-
     # prepare outputs
     outputs = {
         'rho_BZ': rho_BZ,
         'rho_BE': rho_BE,
         'rho_ZE': rho_ZE,
-        'pns_rho_BZ': pns_rho_BZ,
-        'pns_rho_BE': pns_rho_BE,
-        'pns_rho_ZE': pns_rho_ZE,
-        'uns_rho_BZ': uns_rho_BZ,
-        'uns_rho_BE': uns_rho_BE,
-        'uns_rho_ZE': uns_rho_ZE
+        **{
+            key: weighted_sums[key] / weights.masked_fill(weights == 0, torch.nan)
+            for key, weights in weight_sums.items()
+        }
     }
     
     # save outputs

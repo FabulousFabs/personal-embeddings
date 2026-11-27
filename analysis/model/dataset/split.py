@@ -96,7 +96,7 @@ class ArrangementsSplit(Split):
             mask = board_ids == board
             
             # demean
-            positions[mask] = positions[mask] - positions[mask].mean(dim = 1, keepdim = True)
+            positions[mask] = positions[mask] - positions[mask].mean(dim = 0, keepdim = True)
         
         return positions
 
@@ -125,12 +125,10 @@ class ArrangementsSplit(Split):
             mask = board_ids == board
             
             # compute radius
-            r = (
-                (positions[mask] - torch.zeros_like(positions[mask])
-            ) ** 2).sum(dim = 1, keepdim = True).max(dim = 0, keepdim = True).values
+            r = torch.linalg.vector_norm(positions[mask], dim = -1).max()
             
             # scale
-            positions[mask] = positions[mask] / (r + 1e-9)
+            positions[mask] = positions[mask] / r
         
         return positions
     
